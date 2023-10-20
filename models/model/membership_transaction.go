@@ -1,7 +1,6 @@
 package model
 
 import (
-	"catering-api/constants"
 	"time"
 
 	"gorm.io/gorm"
@@ -9,9 +8,9 @@ import (
 
 type MembershipTransaction struct {
 	ID                  uint64 `gorm:"primaryKey;notNull"`
-	MembershipPackageID uint64
+	MembershipPackageID uint64 
 	PaymentID 			uint64
-	Status				constants.StatusTransactions
+	Status				string
 	CreatedAt           time.Time
 	UpdatedAt           time.Time	
 	DeletedAt           gorm.DeletedAt

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"catering-api/constants"
 	"time"
 
 	"gorm.io/gorm"
@@ -16,10 +15,11 @@ type User struct {
 	Password           string
 	Address            string
 	Phone              string
-	Gender             constants.GenderType
-	MembershipType     constants.MembershipType
+	Gender             string
+	MembershipType     string
 	MembershipDuration uint32
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
 	DeletedAt          gorm.DeletedAt
+	MenuTransactions	[]MenuTransaction
 }

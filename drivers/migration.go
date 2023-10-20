@@ -10,12 +10,12 @@ func DBMigration(db *gorm.DB) error {
 	err := db.AutoMigrate(
 		model.Admin{},
 		model.User{},
+		model.Menu{},
 		model.Food{},
+		model.Payment{},
 		model.MembershipPackage{},
 		model.MembershipTransaction{},
-		model.Menu{},
 		model.MenuTransaction{},
-		model.Payment{},
 	)
 
 	if err != nil {
