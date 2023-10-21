@@ -22,7 +22,7 @@ func (Ai *AdminImplementation) GetAllAdmin() ([]dto.AdminResponse, error) {
 
 	var Admin []dto.AdminResponse
 
-	// Periksa jika ada error dalam proses penyalinan
+	// Periksa jika ada error dalam proses penyalinan	
 	if err := copier.Copy(&Admin, &AdminModel); err != nil {
 		return nil, err
 	}
