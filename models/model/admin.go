@@ -17,4 +17,5 @@ type Admin struct {
 	Payments	[]Payment
 	Menus 		[]Menu
 	Foods		[]Food
+	MembershipPackages	[]MembershipPackage
 }

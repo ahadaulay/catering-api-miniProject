@@ -7,5 +7,5 @@ type MenuRepository interface {
 	GetMenuByID(uint64) (dto.MenuResponse , error)
 	CreateMenu(input dto.MenuCreate) error
 	UpdateMenu( id uint64 , input dto.MenuResponse) error
-	DeleteMenu(uint64) error
+	DeleteMenu(id uint64) error
 }

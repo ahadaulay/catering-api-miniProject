@@ -11,6 +11,7 @@ type Food struct {
 	AdminID 	uint64
 	MenuID    	uint64
 	Name     	string
+	Image		string
 	CreatedAt 	time.Time
 	UpdatedAt 	time.Time
 	DeletedAt 	gorm.DeletedAt
