@@ -5,14 +5,17 @@ import (
 	membershippackagecontroller "catering-api/controllers/membership_package_controller"
 	menucontroller "catering-api/controllers/menu_controller"
 	paymentcontroller "catering-api/controllers/payment_controller"
+	usercontroller "catering-api/controllers/user_controller"
 	adminrepository "catering-api/repositorys/admin_repository"
 	membershippackagerepository "catering-api/repositorys/membership_package_repository"
 	menurepository "catering-api/repositorys/menu_repository"
 	paymentrepository "catering-api/repositorys/payment_repository"
+	userrepository "catering-api/repositorys/user_repository"
 	adminservice "catering-api/services/admin_service"
 	membershippackageservice "catering-api/services/membership_package_service"
 	menuservice "catering-api/services/menu_service"
 	paymentservice "catering-api/services/payment_service"
+	userservice "catering-api/services/user_service"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -25,12 +28,14 @@ func RouteService(db *gorm.DB) *echo.Echo {
 	menuRouteRepository := menurepository.NewMenuRepository(db)
 	membershipPackageRepository := membershippackagerepository.NewMenuRepository(db)
 	paymentRepository := paymentrepository.NewPaymentRepository(db)
+	userRepository := userrepository.NewUserRepository(db)
 
 	//route service
 	adminRouteService := adminservice.NewAdminService(adminRouteRepository)
 	menuRouteService := menuservice.NewMenuService(menuRouteRepository)
 	membershipPackageService := membershippackageservice.NewMenuService(membershipPackageRepository)
 	paymentService := paymentservice.NewMenuService(paymentRepository)
+	userService := userservice.NewMenuService(userRepository)
 
 
 	//route controller
@@ -50,12 +55,25 @@ func RouteService(db *gorm.DB) *echo.Echo {
 		PaymentService: paymentService,
 	}
 
+	UserController := usercontroller.UserController{
+		UserService: userService,
+	}
+
 
 
 	
 	app := echo.New()
 
 	// ROUTES
+	//user routes
+	app.GET("/user",UserController.GetAllUser)
+	app.GET("/user:id",UserController.GetUserByID)
+	app.POST("/user",UserController.CreateUser)
+	app.PUT("/user:id",UserController.UpdateUser)
+	app.DELETE("/user/:id",UserController.DeleteUser)
+	app.POST("/userLogin",UserController.LoginUser)
+	app.POST("/logoutUSer",UserController.LogoutUser)
+
 	// Admin routes
 	app.GET("/admin",AdminController.GetAllAdmin)
 	app.POST("/admin",AdminController.CreateAdmin)
