@@ -11,9 +11,9 @@ type MembershipTransactionResponse struct {
 	MembershipPackageID uint64			`json:"membership_package_id"` 		
 	PaymentID 			uint64			`json:"payment_id"`
 	Status    			string			`json:"status"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	CreatedAt time.Time	`json:"created_at"`
+	UpdatedAt time.Time	`json:"updated_at"`
+	DeletedAt gorm.DeletedAt	`json:"deleted_at"`
 }
 
 type MembershipTransactionCreate struct {

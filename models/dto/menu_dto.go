@@ -12,9 +12,9 @@ type MenuResponse struct {
 	Name      string `json:"name"`
 	MenuType  string `json:"menu_type"`
 	Stock     int64  `json:"stock"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	CreatedAt time.Time	`json:"created_at"`
+	UpdatedAt time.Time	`json:"updated_at"`
+	DeletedAt gorm.DeletedAt	`json:"deleted_at"`
 }
 
 type MenuCreate struct {

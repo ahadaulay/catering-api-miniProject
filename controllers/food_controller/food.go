@@ -1,4 +1,4 @@
-package menucontroller
+package foodcontroller
 
 import (
 	"catering-api/models/dto"

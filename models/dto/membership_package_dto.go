@@ -11,9 +11,9 @@ type MembershipPackageResponse struct {
 	AdminID				uint64	`json:"admin_id"`
 	Name                string	`json:"name"`
 	Duration            uint16	`json:"duration"`
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
-	DeletedAt           gorm.DeletedAt
+	CreatedAt time.Time	`json:"created_at"`
+	UpdatedAt time.Time	`json:"updated_at"`
+	DeletedAt gorm.DeletedAt	`json:"deleted_at"`
 }
 
 type MembershipPackageCreate struct {
