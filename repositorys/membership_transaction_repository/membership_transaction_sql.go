@@ -75,7 +75,7 @@ func (Mti *MembershipTransactionImplementation) CreateMembershipTransaction(inpu
 	return nil
 }
 
-func (Mti *MembershipTransactionImplementation) UpdateMembershipTransaction(id uint64, input dto.MembershipTransactionResponse) error {
+func (Mti *MembershipTransactionImplementation) UpdateMembershipTransaction(id uint64, input dto.MembershipTransactionCreate) error {
 	// Update menu with new data
 	result := Mti.db.Model(&model.MembershipTransaction{}).Where("id = ?", id).Updates(&model.MembershipTransaction{
 		MembershipPackageID: input.ID ,

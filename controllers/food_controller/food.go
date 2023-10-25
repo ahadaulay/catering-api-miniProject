@@ -1,11 +1,18 @@
 package foodcontroller
 
 import (
+	"catering-api/helpers"
 	"catering-api/models/dto"
 	foodservice "catering-api/services/food_Service"
+	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
+	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -44,7 +51,7 @@ func (Fc *FoodController) GetFoodByID(c echo.Context) error   {
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"message": "fail get menu",
+			"message": "fail get food",
 			"error":   err.Error(),
 		})
 	}
@@ -58,16 +65,53 @@ func (Fc *FoodController) GetFoodByID(c echo.Context) error   {
 }
 
 func (Fc *FoodController) CreateFood(c echo.Context) error {
+	svc, err := helpers.ConnectAWS()
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, err)
+    }
+
+    file, err := c.FormFile("image")
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, err)
+    }
+
+    src, err := file.Open()
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, err)
+    }
+    defer src.Close()
+
+    uniqueFilename := uuid.New().String() + "_" + time.Now().Format("20060102150405") + filepath.Ext(file.Filename)
+
+    params := &s3.PutObjectInput{
+        Bucket: aws.String(helpers.GetConfig("AWS_BUCKET_NAME")),
+        Key:    aws.String(uniqueFilename),
+        Body:   src,
+    }
+
+    _, err = svc.PutObject(params)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, err)
+    }
+
+    // Dapatkan URL file yang diunggah
+    imageURL := fmt.Sprintf("https://%s.s3.amazonaws.com/%s", helpers.GetConfig("AWS_BUCKET_NAME"), uniqueFilename)
+
 	var food dto.FoodCreate
+	
+	admin_id := c.FormValue("admin_id")
+	admin_id_value, _ := strconv.ParseUint(admin_id, 10, 64)
 
-	err := c.Bind(&food)
+	menu_id := c.FormValue("admin_id")
+	menu_id_value, _ := strconv.ParseUint(menu_id, 10, 64)
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest,echo.Map{
-			"message" : "failed to bind data",
-			"error" : err,
-		})
-	}
+	name := c.FormValue("name")
+
+	food.Name = name
+	food.AdminID = admin_id_value
+	food.MenuID = menu_id_value
+	food.Image = imageURL
+	
 
 	err = Fc.FoodService.CreateFood(food)
 

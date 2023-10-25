@@ -6,6 +6,9 @@ import (
 )
 
 func main() {
+
+	helpers.ConnectAWS()
+
 	db := helpers.DatabaseConnect()
 
 	server := routes.RouteService(db)

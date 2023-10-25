@@ -13,7 +13,7 @@ type FoodImplementation struct {
 }
 
 func (Fi *FoodImplementation) GetAllFood() ([]dto.FoodResponse , error)  {
-	var FoodModel model.Food
+	var FoodModel []model.Food
 
 	err := Fi.db.Find(&FoodModel).Error
 
@@ -55,7 +55,7 @@ func(Fi *FoodImplementation) GetFoodByID(id uint64) (dto.FoodResponse , error)  
 	return Food, nil 
 }
 
-func (Fi *FoodImplementation) CreateFood(input dto.FoodCreate) (error)  {
+func (Fi *FoodImplementation) CreateFood(input dto.FoodCreate) error  {
 	var FoodModel model.Food
 
 	err := copier.Copy(&FoodModel,&input)
@@ -63,8 +63,6 @@ func (Fi *FoodImplementation) CreateFood(input dto.FoodCreate) (error)  {
 	if err != nil {
 		return err
 	}
-
-	FoodModel.Image = "gambar"
 
 	err = Fi.db.Model(&model.Food{}).Create(&FoodModel).Error
 

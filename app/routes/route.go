@@ -6,6 +6,7 @@ import (
 	admincontroller "catering-api/controllers/admin_controller"
 	foodcontroller "catering-api/controllers/food_controller"
 	membershippackagecontroller "catering-api/controllers/membership_package_controller"
+	membershiptransactioncontroller "catering-api/controllers/membership_transaction_controller"
 	menucontroller "catering-api/controllers/menu_controller"
 	paymentcontroller "catering-api/controllers/payment_controller"
 	usercontroller "catering-api/controllers/user_controller"
@@ -13,12 +14,14 @@ import (
 	adminrepository "catering-api/repositorys/admin_repository"
 	foodrepository "catering-api/repositorys/food_repository"
 	membershippackagerepository "catering-api/repositorys/membership_package_repository"
+	membershiptransactionrepository "catering-api/repositorys/membership_transaction_repository"
 	menurepository "catering-api/repositorys/menu_repository"
 	paymentrepository "catering-api/repositorys/payment_repository"
 	userrepository "catering-api/repositorys/user_repository"
 	adminservice "catering-api/services/admin_service"
 	foodservice "catering-api/services/food_Service"
 	membershippackageservice "catering-api/services/membership_package_service"
+	membershiptransactionservice "catering-api/services/membership_transaction_service"
 	menuservice "catering-api/services/menu_service"
 	paymentservice "catering-api/services/payment_service"
 	userservice "catering-api/services/user_service"
@@ -37,6 +40,7 @@ func RouteService(db *gorm.DB) *echo.Echo {
 	paymentRepository := paymentrepository.NewPaymentRepository(db)
 	userRepository := userrepository.NewUserRepository(db)
 	foodRepository := foodrepository.NewFoodRepository(db)
+	membershipTransactionRepository := membershiptransactionrepository.NewMenuRepository(db)
 
 	//route service
 	adminRouteService := adminservice.NewAdminService(adminRouteRepository)
@@ -45,6 +49,7 @@ func RouteService(db *gorm.DB) *echo.Echo {
 	paymentService := paymentservice.NewMenuService(paymentRepository)
 	userService := userservice.NewMenuService(userRepository)
 	foodService := foodservice.NewFoodService(foodRepository)
+	membershipTransactionService := membershiptransactionservice.NewMenuService(membershipTransactionRepository)
 
 
 	//route controller
@@ -70,6 +75,10 @@ func RouteService(db *gorm.DB) *echo.Echo {
 
 	FoodController := foodcontroller.FoodController{
 		FoodService: foodService,
+	}
+
+	membershipTransactionController := membershiptransactioncontroller.MembershipTransactionController{
+		MembershipTransactionService: membershipTransactionService,
 	}
 	
 	app := echo.New()
@@ -128,6 +137,13 @@ func RouteService(db *gorm.DB) *echo.Echo {
 	app.POST("/membershippackage",MembershipPackgeController.CreateMembershipPackage)
 	app.PUT("/membershippackage/:id",MembershipPackgeController.UpdateMembershipPackage)
 	app.DELETE("/membershippackage/:id",MembershipPackgeController.DeleteMembershipPackage)
+
+	//Membership transaction
+	app.GET("/membershiptransaction",membershipTransactionController.GetAllMembershipTransaction)
+	app.GET("/membershiptransaction/:id",membershipTransactionController.GetMembershipTransactionByID)
+	app.POST("/membershiptransaction",membershipTransactionController.CreateMembershipTransaction)
+	app.PUT("/membershiptransaction/:id",membershipTransactionController.UpdateMembershipTransaction)
+	app.DELETE("/membershiptransaction:id",membershipTransactionController.DeleteMembershipTransaction)
 
 	//Payment routes
 	app.GET("/payment",PaymentController.GetAllPayment)
