@@ -190,6 +190,7 @@ func (Uc *UserController) LoginUser(c echo.Context) error {
 func (Uc *UserController) LogoutUser(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 
+
 	isListed := middlewares.CheckTokenUser(user.Raw)
 
 	if !isListed {

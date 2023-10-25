@@ -133,9 +133,10 @@ func (Ui *UserImplementation) LoginUser(input dto.UserLogin) (dto.UserResponse, 
 		return dto.UserResponse{}, errors.New("wrong password")
 	}
 	var UserLoginResponse = dto.UserResponse{
-		ID:           input.ID,
-		Email:        input.Email,
-		Password:     input.Password,
+		ID:         UserLogin.ID,
+		Name: 		UserLogin.Name,
+		Email:      UserLogin.Email,
+		Password:   UserLogin.Password,
 	}
 	
 	return UserLoginResponse, nil

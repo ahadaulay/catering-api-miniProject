@@ -1,11 +1,14 @@
 package routes
 
 import (
+	"catering-api/app/middlewares"
+	middlewareUser "catering-api/app/middlewares/user"
 	admincontroller "catering-api/controllers/admin_controller"
 	membershippackagecontroller "catering-api/controllers/membership_package_controller"
 	menucontroller "catering-api/controllers/menu_controller"
 	paymentcontroller "catering-api/controllers/payment_controller"
 	usercontroller "catering-api/controllers/user_controller"
+	"catering-api/helpers"
 	adminrepository "catering-api/repositorys/admin_repository"
 	membershippackagerepository "catering-api/repositorys/membership_package_repository"
 	menurepository "catering-api/repositorys/menu_repository"
@@ -18,6 +21,7 @@ import (
 	userservice "catering-api/services/user_service"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/gorm"
 )
 
@@ -58,28 +62,45 @@ func RouteService(db *gorm.DB) *echo.Echo {
 	UserController := usercontroller.UserController{
 		UserService: userService,
 	}
+	
+	app := echo.New()
+
+	configLogger := middlewares.ConfigLogger{
+		Format: "[${time_rfc3339}] ${status} ${method} ${host} ${path} ${latency_human}" + "\n",
+	}
+
+	configUser := middleware.JWTConfig{
+		Claims: &middlewareUser.JwtUserClaims{},
+		SigningKey: []byte(helpers.GetConfig("TOKEN_SECRET")),
+	}
+
+	app.Use(configLogger.Init())
+	app.Use(middleware.CORS())
 
 
 
 	
-	app := echo.New()
+	
 
 	// ROUTES
 	//user routes
 	app.GET("/user",UserController.GetAllUser)
 	app.GET("/user:id",UserController.GetUserByID)
 	app.POST("/user",UserController.CreateUser)
-	app.PUT("/user:id",UserController.UpdateUser)
+	app.PUT("/user/:id",UserController.UpdateUser)
 	app.DELETE("/user/:id",UserController.DeleteUser)
 	app.POST("/userLogin",UserController.LoginUser)
-	app.POST("/logoutUSer",UserController.LogoutUser)
+
+	privateUser := app.Group("/user", middleware.JWTWithConfig(configUser))
+	privateUser.Use(middlewares.CheckTokenMiddlewareUser)
+	privateUser.POST("/userLogout",UserController.LogoutUser)
 
 	// Admin routes
 	app.GET("/admin",AdminController.GetAllAdmin)
 	app.POST("/admin",AdminController.CreateAdmin)
 
 	//Menu routes
-	app.GET("/menu",MenuController.GetAllMenu)
+	privateUser.GET("/menu",MenuController.GetAllMenu)
 	app.GET("/menu/:id",MenuController.GetMenuByID)
 	app.POST("/menu",MenuController.CreateMenu)
 	app.PUT("/menu/:id",MenuController.UpdateMenu)

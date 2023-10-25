@@ -55,31 +55,62 @@ func (Mti *MembershipTransactionImplementation) GetMembershipTransactionByID(id 
 	return MembershipTransaction, nil 
 }
 
-func (Mti *MembershipTransactionImplementation) GetMembershipTransactionByUserID(user_id uint64) (dto.MembershipTransactionResponse , error)  {
+func (Mti *MembershipTransactionImplementation) CreateMembershipTransaction(input dto.MembershipTransactionCreate) error  {
 	var MembershipTransactionModel model.MembershipTransaction
 
-	err := Mti.db.Model(&model.MembershipTransaction{}).Where("user_id = ? ", user_id).Find(&MembershipTransactionModel).Error
+	MembershipTransactionModel.Status = "pending"
+
+	err := copier.Copy(&MembershipTransactionModel,&input)
 
 	if err != nil {
-		return dto.MembershipTransactionResponse{}, err
+		return err
 	}
 
-	// Periksa apakah data ditemukan
-	if MembershipTransactionModel.ID == 0 {
-		return dto.MembershipTransactionResponse{}, gorm.ErrRecordNotFound
-	}
-	
-	var MembershipTransaction dto.MembershipTransactionResponse
-
-	err = copier.Copy(&MembershipTransaction,&MembershipTransactionModel)
+	err = Mti.db.Model(&model.MembershipTransaction{}).Create(&MembershipTransactionModel).Error
 
 	if err != nil {
-		return dto.MembershipTransactionResponse{}, err
+		return err
 	}
 
-	return MembershipTransaction, nil 
+	return nil
 }
 
+func (Mti *MembershipTransactionImplementation) UpdateMembershipTransaction(id uint64, input dto.MembershipTransactionResponse) error {
+	// Update menu with new data
+	result := Mti.db.Model(&model.MembershipTransaction{}).Where("id = ?", id).Updates(&model.MembershipTransaction{
+		MembershipPackageID: input.ID ,
+		PaymentID: input.PaymentID,
+		Status: input.Status,
+	})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// Check if any rows were affected
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
+}
+
+
+func (Mti *MembershipTransactionImplementation) DeleteMembershipTransaction(id uint64) error {
+	err := Mti.db.Where("id = ?", id).Delete(&model.MembershipTransaction{}).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func NewMenuRepository(db *gorm.DB) MembershipTransactionRepository  {
+	return &MembershipTransactionImplementation{
+		db: db,
+	}
+}
 
 
 

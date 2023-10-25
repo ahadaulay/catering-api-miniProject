@@ -49,6 +49,7 @@ func (Ui *UserImplementation) CreateUser(input dto.UserCreate) error {
 	password, errPassword := helpers.HashPassword(input.Password)
 
 	input.Password = password
+	input.MembershipDuration = 0
 
 	if errPassword != nil {
 		return errPassword
