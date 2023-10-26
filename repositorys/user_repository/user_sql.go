@@ -142,6 +142,13 @@ func (Ui *UserImplementation) LoginUser(input dto.UserLogin) (dto.UserResponse, 
 	return UserLoginResponse, nil
 }
 
+// func (Ui *UserImplementation) GetUserIDMembershipTransactions() (dto.UserResponse)  {
+// 	var UserMembershipTransaction dto.MembershipTransactionResponse
+	
+	
+
+// }
+
 func NewUserRepository(db *gorm.DB) UserRepository  {
 	return &UserImplementation{
 		db: db,

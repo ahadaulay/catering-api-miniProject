@@ -89,7 +89,12 @@ func RouteService(db *gorm.DB) *echo.Echo {
 
 	configUser := middleware.JWTConfig{
 		Claims: &middlewareUser.JwtUserClaims{},
-		SigningKey: []byte(helpers.GetConfig("TOKEN_SECRET")),
+		SigningKey: []byte(helpers.GetConfig("USER_TOKEN_SECRET")),
+	}
+
+	configAdmin := middleware.JWTConfig{
+		Claims: &middlewareUser.JwtUserClaims{},
+		SigningKey: []byte(helpers.GetConfig("ADMIN_TOKEN_SECRET")),
 	}
 
 	app.Use(configLogger.Init())
@@ -116,6 +121,7 @@ func RouteService(db *gorm.DB) *echo.Echo {
 	// Admin routes
 	app.GET("/admin",AdminController.GetAllAdmin)
 	app.POST("/admin",AdminController.CreateAdmin)
+	
 
 	//Menu routes
 	app.GET("/menu",MenuController.GetAllMenu)

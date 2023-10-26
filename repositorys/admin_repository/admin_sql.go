@@ -1,8 +1,10 @@
 package adminrepository
 
 import (
+	"catering-api/helpers"
 	"catering-api/models/dto"
 	"catering-api/models/model"
+	"errors"
 
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
@@ -47,6 +49,30 @@ func (Ai *AdminImplementation) CreateAdmin(input dto.AdminCreate) (error)  {
 	}
 
 	return nil
+}
+
+func (Ai *AdminImplementation) LoginAdmin(input dto.AdminLogin) (dto.AdminResponse, error) {
+	var AdminLogin dto.AdminResponse
+
+	err := Ai.db.Model(&model.Admin{}).First(&AdminLogin, "email = ?", input.Email).Error
+
+	if err != nil {
+		return dto.AdminResponse{}, errors.New("email not registered")
+	}
+
+	match := helpers.CheckPasswordHash(input.Password, AdminLogin.Password)
+
+	if !match {
+		return dto.AdminResponse{}, errors.New("wrong password")
+	}
+	var AdminLoginResponse = dto.AdminResponse{
+		ID:         AdminLogin.ID,
+		Name: 		AdminLogin.Name,
+		Email:      AdminLogin.Email,
+		Password:   AdminLogin.Password,
+	}
+	
+	return AdminLoginResponse, nil
 }
 
 func NewAdminRepository(db *gorm.DB) AdminRepository  {

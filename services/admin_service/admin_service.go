@@ -9,6 +9,7 @@ import (
 type AdminService interface {
     GetAllAdmin() ([]dto.AdminResponse, error)
     CreateAdmin(input dto.AdminCreate) error
+	LoginAdmin(admin dto.AdminLogin) (dto.AdminResponse,error)
 }
 
 
@@ -42,6 +43,15 @@ func (Ai *AdminImplementation) CreateAdmin(input dto.AdminCreate) error  {
 	}
 
 	return nil
+}
+
+func (Ai *AdminImplementation) LoginAdmin(admin dto.AdminLogin) (dto.AdminResponse, error) {
+	// call repository to get user
+	AdminLogin, err := Ai.repository.LoginAdmin(admin)
+	if err != nil {
+		return dto.AdminResponse{}, err
+	}
+	return AdminLogin, nil
 }
 
 func NewAdminService(AdminRepo adminrepository.AdminRepository) AdminService  {

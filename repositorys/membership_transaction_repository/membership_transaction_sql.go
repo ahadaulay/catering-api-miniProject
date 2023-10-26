@@ -58,13 +58,15 @@ func (Mti *MembershipTransactionImplementation) GetMembershipTransactionByID(id 
 func (Mti *MembershipTransactionImplementation) CreateMembershipTransaction(input dto.MembershipTransactionCreate) error  {
 	var MembershipTransactionModel model.MembershipTransaction
 
-	MembershipTransactionModel.Status = "pending"
+	
 
 	err := copier.Copy(&MembershipTransactionModel,&input)
 
 	if err != nil {
 		return err
 	}
+
+	MembershipTransactionModel.Status = "pending"
 
 	err = Mti.db.Model(&model.MembershipTransaction{}).Create(&MembershipTransactionModel).Error
 
@@ -78,7 +80,8 @@ func (Mti *MembershipTransactionImplementation) CreateMembershipTransaction(inpu
 func (Mti *MembershipTransactionImplementation) UpdateMembershipTransaction(id uint64, input dto.MembershipTransactionCreate) error {
 	// Update menu with new data
 	result := Mti.db.Model(&model.MembershipTransaction{}).Where("id = ?", id).Updates(&model.MembershipTransaction{
-		MembershipPackageID: input.ID ,
+		MembershipPackageID: input.MembershipPackageID ,
+		UserID: input.UserID,
 		PaymentID: input.PaymentID,
 		Status: input.Status,
 	})

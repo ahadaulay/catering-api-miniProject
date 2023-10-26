@@ -1,4 +1,4 @@
-package middlewares
+package middlewaresadmin
 
 import (
 	"catering-api/helpers"
@@ -8,18 +8,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var whitelistUser []string = make([]string, 5)
+var whitelistAdmin []string = make([]string, 5)
 
 type JwtUserClaims struct {
 	ID uint64 `json:"id"`
 	jwt.StandardClaims
 }
 
-func GenerateTokenUser(userID uint64) (string, error) {
+func GenerateTokenAdmin(adminID uint64) (string, error) {
 	
 	claims := JwtUserClaims{
-		userID,
-	
+		adminID,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(time.Hour * 2).Unix(),
 		},
@@ -27,11 +26,11 @@ func GenerateTokenUser(userID uint64) (string, error) {
 
 	// Create token with claims
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, err := t.SignedString([]byte(helpers.GetConfig("USER_TOKEN_SECRET")))
+	token, err := t.SignedString([]byte(helpers.GetConfig("ADMIN_TOKEN_SECRET")))
 	if err != nil {
 		return "", err
 	}
-	whitelistUser = append(whitelistUser, token)
+	whitelistAdmin = append(whitelistAdmin, token)
 
 	return token, nil
 }
@@ -39,7 +38,7 @@ func GenerateTokenUser(userID uint64) (string, error) {
 func GetUserCustomer(c echo.Context) *JwtUserClaims {
 	user := c.Get("user").(*jwt.Token)
 
-	isListed := CheckTokenUser(user.Raw)
+	isListed := CheckTokenAdmin(user.Raw)
 
 	if !isListed {
 		return nil
@@ -56,8 +55,8 @@ func GetUserCustomer(c echo.Context) *JwtUserClaims {
 	return claims
 }
 
-func CheckTokenUser(token string) bool {
-	for _, tkn := range whitelistUser {
+func CheckTokenAdmin(token string) bool {
+	for _, tkn := range whitelistAdmin {
 		if tkn == token {
 			return true
 		}
@@ -66,10 +65,10 @@ func CheckTokenUser(token string) bool {
 	return false
 }
 
-func LogoutUser(token string) bool {
-	for idx, tkn := range whitelistUser {
+func LogoutAdmin(token string) bool {
+	for idx, tkn := range whitelistAdmin {
 		if tkn == token {
-			whitelistUser = append(whitelistUser[:idx], whitelistUser[idx+1:]...)
+			whitelistAdmin = append(whitelistAdmin[:idx], whitelistAdmin[idx+1:]...)
 		}
 	}
 

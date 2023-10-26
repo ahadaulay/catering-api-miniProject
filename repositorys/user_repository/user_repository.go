@@ -9,4 +9,7 @@ type UserRepository interface {
 	UpdateUser(id uint64,input dto.UserCreate) error
 	DeleteUser(id uint64) error
 	LoginUser(input dto.UserLogin) (dto.UserResponse , error)
+
+	// GetUserIDMembershipTransactions() (dto.UserResponse)
+
 }

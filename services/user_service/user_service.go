@@ -92,11 +92,11 @@ func (Ui *UserImplementation) DeleteUser(id uint64) error {
 
 func (Ui *UserImplementation) LoginUser(user dto.UserLogin) (dto.UserResponse, error) {
 	// call repository to get user
-	CostumerLogin, err := Ui.repository.LoginUser(user)
+	UserLogin, err := Ui.repository.LoginUser(user)
 	if err != nil {
 		return dto.UserResponse{}, err
 	}
-	return CostumerLogin, nil
+	return UserLogin, nil
 }
 
 func NewMenuService(userRepo userrepository.UserRepository) UserService {

@@ -58,9 +58,19 @@ func (Mtc *MembershipTransactionController) GetMembershipTransactionByID(c echo.
 }
 
 func (Mtc *MembershipTransactionController) CreateMembershipTransaction(c echo.Context) error {
+
+	// // Dapatkan token JWT dari header Authorization
+	// token := c.Request().Header.Get("Authorization")
+
+	// // Periksa apakah token ada dan sesuai dengan format "Bearer [token]"
+	// if token == "" {
+	// 	return c.JSON(http.StatusUnauthorized, "Token tidak ada")
+	// }
+
 	var MembershipTransaction dto.MembershipTransactionCreate
 
 	err := c.Bind(&MembershipTransaction)
+
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest,echo.Map{
@@ -123,6 +133,7 @@ func(Mtc *MembershipTransactionController) DeleteMembershipTransaction(c echo.Co
     if err != nil {
         return c.JSON(http.StatusBadRequest, echo.Map{
             "message": "Invalid membership transaction ID",
+			"id":id,
         })
     }
 
