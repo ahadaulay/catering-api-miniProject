@@ -2,8 +2,12 @@ package userservice
 
 import (
 	"catering-api/helpers"
+	req "catering-api/helpers/request"
 	"catering-api/models/dto"
+	"catering-api/models/model"
 	userrepository "catering-api/repositorys/user_repository"
+	"fmt"
+	"github.com/labstack/echo/v4"
 
 	"github.com/jinzhu/copier"
 )
@@ -14,10 +18,10 @@ type UserService interface {
 	CreateUser(input dto.UserCreate) error
 	UpdateUser(id uint64, input dto.UserCreate) error
 	DeleteUser(id uint64) error
-	LoginUser(input dto.UserLogin) (dto.UserResponse, error)
+	LoginUser(ctx echo.Context, request dto.UserLogin) (*model.User, error)
 }
 
-type UserImplementation struct{
+type UserImplementation struct {
 	repository userrepository.UserRepository
 }
 
@@ -46,14 +50,10 @@ func (Ui *UserImplementation) GetUserByID(id uint64) (dto.UserResponse, error) {
 
 func (Ui *UserImplementation) CreateUser(input dto.UserCreate) error {
 
-	password, errPassword := helpers.HashPassword(input.Password)
+	password := helpers.HashPassword(input.Password)
 
 	input.Password = password
 	input.MembershipDuration = 0
-
-	if errPassword != nil {
-		return errPassword
-	}
 
 	err := Ui.repository.CreateUser(input)
 	if err != nil {
@@ -64,23 +64,18 @@ func (Ui *UserImplementation) CreateUser(input dto.UserCreate) error {
 
 func (Ui *UserImplementation) UpdateUser(id uint64, input dto.UserCreate) error {
 
-	password, errPassword := helpers.HashPassword(input.Password)
+	password := helpers.HashPassword(input.Password)
 
 	input.Password = password
 
-	if errPassword != nil {
-		return errPassword
-	}
-
 	// call repository to update course
-	err := Ui.repository.UpdateUser(id,input)
+	err := Ui.repository.UpdateUser(id, input)
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
-
 
 func (Ui *UserImplementation) DeleteUser(id uint64) error {
 	err := Ui.repository.DeleteUser(id)
@@ -90,13 +85,22 @@ func (Ui *UserImplementation) DeleteUser(id uint64) error {
 	return nil
 }
 
-func (Ui *UserImplementation) LoginUser(user dto.UserLogin) (dto.UserResponse, error) {
-	// call repository to get user
-	UserLogin, err := Ui.repository.LoginUser(user)
+func (Ui *UserImplementation) LoginUser(c echo.Context, request dto.UserLogin) (*model.User, error) {
+
+	existingUser, err := Ui.repository.FindByEmail(request.Email)
 	if err != nil {
-		return dto.UserResponse{}, err
+		return nil, fmt.Errorf("invalid email or password")
 	}
-	return UserLogin, nil
+
+	user := req.UserLoginRequestToUserDomain(request)
+
+	err = helpers.ComparePassword(existingUser.Password, user.Password)
+	if err != nil {
+		return nil, fmt.Errorf("invalid email or password")
+	}
+
+	return existingUser, nil
+
 }
 
 func NewMenuService(userRepo userrepository.UserRepository) UserService {

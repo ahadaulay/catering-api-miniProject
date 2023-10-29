@@ -1,13 +1,16 @@
 package usercontroller
 
 import (
-	middlewares "catering-api/app/middlewares/user"
+	"catering-api/helpers"
+	"catering-api/helpers/middleware"
+	"catering-api/helpers/response"
 	"catering-api/models/dto"
 	userservice "catering-api/services/user_service"
+	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,32 +18,32 @@ type UserController struct {
 	UserService userservice.UserService
 }
 
-func (Uc *UserController) GetAllUser(c echo.Context) error  {
+func (Uc *UserController) GetAllUser(c echo.Context) error {
 
-	user,err := Uc.UserService.GetAllUser()
+	user, err := Uc.UserService.GetAllUser()
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest,echo.Map{
+		c.JSON(http.StatusBadRequest, echo.Map{
 			"message": "fail get all user",
 			"error":   err,
 		})
 	}
 
-	return c.JSON(http.StatusAccepted,echo.Map{
-		"message" : "success get all user",
-		"data" : user,
+	return c.JSON(http.StatusAccepted, echo.Map{
+		"message": "success get all user",
+		"data":    user,
 	})
 }
 
-func (Uc *UserController) GetUserByID(c echo.Context) error   {
+func (Uc *UserController) GetUserByID(c echo.Context) error {
 	var user dto.UserResponse
 
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, echo.Map{
-            "message": "Invalid user ID",
-        })
-    }
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid user ID",
+		})
+	}
 
 	user, err = Uc.UserService.GetUserByID(id)
 
@@ -54,7 +57,7 @@ func (Uc *UserController) GetUserByID(c echo.Context) error   {
 	// Return response if success
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "success get user by id",
-		"data" : user,
+		"data":    user,
 	})
 
 }
@@ -65,9 +68,9 @@ func (Uc *UserController) CreateUser(c echo.Context) error {
 	err := c.Bind(&user)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest,echo.Map{
-			"message" : "failed to bind data",
-			"error" : err,
+		c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "failed to bind data",
+			"error":   err,
 		})
 	}
 
@@ -90,11 +93,11 @@ func (Uc *UserController) UpdateUser(c echo.Context) error {
 	var user dto.UserCreate
 
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, echo.Map{
-            "message": "Invalid user ID",
-        })
-    }
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid user ID",
+		})
+	}
 
 	// Binding request body to struct
 	if err := c.Bind(&user); err != nil {
@@ -105,7 +108,7 @@ func (Uc *UserController) UpdateUser(c echo.Context) error {
 	}
 
 	// Call service to update user
-	if err := Uc.UserService.UpdateUser(id , user); err != nil {
+	if err := Uc.UserService.UpdateUser(id, user); err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"message": "Failed to update user",
 			"error":   err.Error(),
@@ -118,15 +121,14 @@ func (Uc *UserController) UpdateUser(c echo.Context) error {
 	})
 }
 
+func (Uc *UserController) DeleteUser(c echo.Context) error {
 
-func(Uc *UserController) DeleteUser(c echo.Context) error  {
-
-    id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, echo.Map{
-            "message": "Invalid user id",
-        })
-    }
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid user id",
+		})
+	}
 
 	// Call service to delete course
 	err = Uc.UserService.DeleteUser(id)
@@ -145,65 +147,35 @@ func(Uc *UserController) DeleteUser(c echo.Context) error  {
 }
 
 func (Uc *UserController) LoginUser(c echo.Context) error {
-	var UserLogin dto.UserLogin
-	err := c.Bind(&UserLogin)
+	UserLoginRequest := dto.UserLogin{}
+
+	err := c.Bind(&UserLoginRequest)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"message": "fail bind data",
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid request data",
 			"error":   err.Error(),
 		})
 	}
 
-	var user dto.UserResponse
+	responses, err := Uc.UserService.LoginUser(c, UserLoginRequest)
 
-	user, err = Uc.UserService.LoginUser(UserLogin)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"message": "fail login",
-			"error":   err.Error(),
-		})
+		if strings.Contains(err.Error(), "invalid email or password") {
+			return c.JSON(http.StatusBadRequest, errors.New("invalid email or password"))
+		}
+
+		return c.JSON(http.StatusInternalServerError, errors.New("sign in error"))
 	}
 
-	token, errToken := middlewares.GenerateTokenUser(user.ID)
+	userLoginResponse := response.UserDomainToUserLoginResponse(responses)
 
-	if errToken != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"message": "fail create token",
-			"error":   errToken,
-		})
+	token, err := middleware.GenerateTokenUser(responses.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.New("generate jwt token error"))
 	}
 
-	userResponseLogin := dto.UserResponseLogin{
-		ID: user.ID,
-		Name:  user.Name,
-		Email: user.Email,
-		Token: token,
-	}
+	userLoginResponse.Token = token
 
-	return c.JSON(200, echo.Map{
-		"message": "success login",
-		"user":    userResponseLogin,
-	})
+	return c.JSON(http.StatusCreated, helpers.SuccessResponse("Succesfully Sign In", userLoginResponse))
 }
-
-func (Uc *UserController) LogoutUser(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-
-
-	isListed := middlewares.CheckTokenUser(user.Raw)
-
-	if !isListed {
-		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"message": "invalid token",
-		})
-	}
-
-	middlewares.LogoutUser(user.Raw)
-
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "logout success",
-	})
-}
-
-

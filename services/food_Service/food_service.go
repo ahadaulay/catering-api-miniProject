@@ -11,8 +11,9 @@ type FoodService interface {
 	GetAllFood() ([]dto.FoodResponse, error)
 	GetFoodByID(uint64) (dto.FoodResponse, error)
 	CreateFood(input dto.FoodCreate) error
-	UpdateFood(id uint64 ,  input dto.FoodCreate) error
+	UpdateFood(id uint64, input dto.FoodCreate) error
 	DeleteFood(id uint64) error
+	GetFoodByAdminID(adminID uint64) ([]dto.FoodResponse, error)
 }
 
 type FoodImplementation struct {
@@ -52,13 +53,12 @@ func (Fi *FoodImplementation) CreateFood(input dto.FoodCreate) error {
 
 func (Fi *FoodImplementation) UpdateFood(id uint64, input dto.FoodCreate) error {
 	// call repository to update course
-	err := Fi.repository.UpdateFood(id,input)
+	err := Fi.repository.UpdateFood(id, input)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-
 
 func (Fi *FoodImplementation) DeleteFood(id uint64) error {
 	err := Fi.repository.DeleteFood(id)
@@ -66,6 +66,15 @@ func (Fi *FoodImplementation) DeleteFood(id uint64) error {
 		return err
 	}
 	return nil
+}
+
+func (Fi *FoodImplementation) GetFoodByAdminID(adminID uint64) ([]dto.FoodResponse, error) {
+	data, err := Fi.repository.GetFoodByAdminID(adminID)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 func NewFoodService(foodRepo foodrepository.FoodRepository) FoodService {

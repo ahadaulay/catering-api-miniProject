@@ -24,7 +24,7 @@ func (Ai *AdminImplementation) GetAllAdmin() ([]dto.AdminResponse, error) {
 
 	var Admin []dto.AdminResponse
 
-	// Periksa jika ada error dalam proses penyalinan	
+	// Periksa jika ada error dalam proses penyalinan
 	if err := copier.Copy(&Admin, &AdminModel); err != nil {
 		return nil, err
 	}
@@ -32,11 +32,10 @@ func (Ai *AdminImplementation) GetAllAdmin() ([]dto.AdminResponse, error) {
 	return Admin, nil
 }
 
-
-func (Ai *AdminImplementation) CreateAdmin(input dto.AdminCreate) (error)  {
+func (Ai *AdminImplementation) CreateAdmin(input dto.AdminCreate) error {
 	var AdminModel model.Admin
 
-	err := copier.Copy(&AdminModel,&input)
+	err := copier.Copy(&AdminModel, &input)
 
 	if err != nil {
 		return err
@@ -60,23 +59,34 @@ func (Ai *AdminImplementation) LoginAdmin(input dto.AdminLogin) (dto.AdminRespon
 		return dto.AdminResponse{}, errors.New("email not registered")
 	}
 
-	match := helpers.CheckPasswordHash(input.Password, AdminLogin.Password)
+	err = helpers.ComparePassword(input.Password, AdminLogin.Password)
 
-	if !match {
+	if err != nil {
 		return dto.AdminResponse{}, errors.New("wrong password")
 	}
 	var AdminLoginResponse = dto.AdminResponse{
-		ID:         AdminLogin.ID,
-		Name: 		AdminLogin.Name,
-		Email:      AdminLogin.Email,
-		Password:   AdminLogin.Password,
+		ID:       AdminLogin.ID,
+		Name:     AdminLogin.Name,
+		Email:    AdminLogin.Email,
+		Password: AdminLogin.Password,
 	}
-	
+
 	return AdminLoginResponse, nil
 }
 
-func NewAdminRepository(db *gorm.DB) AdminRepository  {
+func (Ai *AdminImplementation) FindByEmail(email string) (*model.Admin, error) {
+	admin := model.Admin{}
+
+	result := Ai.db.Where("email = ?", email).First(&admin)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &admin, nil
+}
+
+func NewAdminRepository(db *gorm.DB) AdminRepository {
 	return &AdminImplementation{
-		db : db,
+		db: db,
 	}
 }

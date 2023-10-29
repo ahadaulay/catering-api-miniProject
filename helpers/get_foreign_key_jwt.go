@@ -2,28 +2,34 @@ package helpers
 
 import (
 	"github.com/golang-jwt/jwt"
+	"strconv"
 )
 
-func GetUserIDJWT(token string) (uint64,error) {
-	// Pisahkan token dari "Bearer "
-	token = token[len("Bearer "):]
+type JwtClaims struct {
+	UserID             string `json:"user_id"`
+	Username           string `json:"username"`
+	Email              string `json:"email"`
+	jwt.StandardClaims        // Embed StandardClaims untuk mendapatkan waktu kedaluwarsa token
+}
 
-	// Parse token dengan kunci rahasia
-	claims := jwt.MapClaims{}
+func GetUserIDJWT(token string) (uint64, error) {
+
+	// Mengekstrak klaim dari token JWT
+	claims := &JwtClaims{} // Sesuaikan dengan struktur klaim Anda
 	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		// Anda perlu menggantikan "your-secret-key" dengan kunci rahasia yang sesuai dengan token Anda.
-		return []byte(GetConfig("TOKEN_SECRET")), nil
+		return []byte("your-secret-key"), nil // Ganti dengan kunci rahasia JWT Anda
 	})
 
 	if err != nil {
-		return 0 , err
+		// Handle kesalahan JWT
+		return 0, err
 	}
 
-	// Dapatkan user_id dari claims
-	user_id, ok := claims["user_id"].(uint64)
-	if !ok {
-		return 0 ,err
-	}
+	// Gunakan user_id dari klaim
+	user_idStr := claims.UserID // Sesuaikan dengan nama klaim yang sesuai di token JWT Anda
 
-	return user_id , nil
+	user_id, err := strconv.ParseUint(user_idStr, 10, 64)
+
+	return user_id, nil
+
 }
