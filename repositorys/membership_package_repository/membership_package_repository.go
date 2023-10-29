@@ -8,4 +8,5 @@ type MembershipPackageRepository interface {
 	CreateMembershipPackage(input dto.MembershipPackageCreate) error
 	UpdateMembershipPackage(id uint64, input dto.MembershipPackageResponse) error
 	DeleteMembershipPackage(id uint64) error
+	GetMembershipPackageByAdminID(adminID uint64) ([]dto.MembershipPackageResponse, error)
 }

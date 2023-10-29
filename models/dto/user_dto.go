@@ -16,9 +16,9 @@ type UserResponse struct {
 	Gender             string		`json:"gender"`
 	MembershipType     string		`json:"membership_type"`
 	MembershipDuration uint32		`json:"membership_duration"`
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
-	DeletedAt          gorm.DeletedAt
+	CreatedAt time.Time	`json:"created_at"`
+	UpdatedAt time.Time	`json:"updated_at"`
+	DeletedAt gorm.DeletedAt	`json:"deleted_at"`
 }
 
 type UserCreate struct {

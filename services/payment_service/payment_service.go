@@ -11,8 +11,9 @@ type PaymentService interface {
 	GetAllPayment() ([]dto.PaymentResponse, error)
 	GetPaymentByID(uint64) (dto.PaymentResponse, error)
 	CreatePayment(input dto.PaymentCreate) error
-	UpdatePayment(id uint64 ,  input dto.PaymentResponse) error
+	UpdatePayment(id uint64, input dto.PaymentResponse) error
 	DeletePayment(id uint64) error
+	GetPaymentByAdminID(adminID uint64) ([]dto.PaymentResponse, error)
 }
 
 type PaymentImplementation struct {
@@ -52,13 +53,12 @@ func (Pi *PaymentImplementation) CreatePayment(input dto.PaymentCreate) error {
 
 func (Pi *PaymentImplementation) UpdatePayment(id uint64, input dto.PaymentResponse) error {
 	// call repository to update course
-	err := Pi.repository.UpdatePayment(id,input)
+	err := Pi.repository.UpdatePayment(id, input)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-
 
 func (Pi *PaymentImplementation) DeletePayment(id uint64) error {
 	err := Pi.repository.DeletePayment(id)
@@ -66,6 +66,15 @@ func (Pi *PaymentImplementation) DeletePayment(id uint64) error {
 		return err
 	}
 	return nil
+}
+
+func (Pi *PaymentImplementation) GetPaymentByAdminID(adminID uint64) ([]dto.PaymentResponse, error) {
+	data, err := Pi.repository.GetPaymentByAdminID(adminID)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 func NewMenuService(paymentRepo paymentrepository.PaymentRepository) PaymentService {

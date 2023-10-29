@@ -8,10 +8,12 @@ import (
 
 type MembershipTransaction struct {
 	ID                  uint64 `gorm:"primaryKey;notNull"`
-	MembershipPackageID uint64 
-	PaymentID 			uint64
-	Status				string
+	UserID              uint64
+	MembershipPackageID uint64
+	PaymentID           uint64
+	Proof               string
+	Status              string
 	CreatedAt           time.Time
-	UpdatedAt           time.Time	
+	UpdatedAt           time.Time
 	DeletedAt           gorm.DeletedAt
 }

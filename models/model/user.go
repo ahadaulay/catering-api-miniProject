@@ -22,4 +22,5 @@ type User struct {
 	UpdatedAt          time.Time
 	DeletedAt          gorm.DeletedAt
 	MenuTransactions	[]MenuTransaction
+	MembershipTransactions []MembershipTransaction
 }

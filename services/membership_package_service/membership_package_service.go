@@ -13,6 +13,7 @@ type MembershipPackageService interface {
 	CreateMembershipPackage(input dto.MembershipPackageCreate) error
 	UpdateMembershipPackage(id uint64, input dto.MembershipPackageResponse) error
 	DeleteMembershipPackage(id uint64) error
+	GetMembershipPackageByAdminID(adminID uint64) ([]dto.MembershipPackageResponse, error)
 }
 
 type MembershipPackageImplementation struct {
@@ -65,6 +66,15 @@ func (Mpi *MembershipPackageImplementation) DeleteMembershipPackage(id uint64) e
 		return err
 	}
 	return nil
+}
+
+func (Mpi *MembershipPackageImplementation) GetMembershipPackageByAdminID(adminID uint64) ([]dto.MembershipPackageResponse, error) {
+	data, err := Mpi.repository.GetMembershipPackageByAdminID(adminID)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 func NewMenuService(MembershipPackageRepo membershippackagerepository.MembershipPackageRepository) MembershipPackageService {

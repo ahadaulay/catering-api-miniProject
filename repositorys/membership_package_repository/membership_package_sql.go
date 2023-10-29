@@ -12,7 +12,7 @@ type MembershipPackageImplementation struct {
 	db *gorm.DB
 }
 
-func (Mpi MembershipPackageImplementation) GetAllMembershipPackage() ([]dto.MembershipPackageResponse,error)  {
+func (Mpi MembershipPackageImplementation) GetAllMembershipPackage() ([]dto.MembershipPackageResponse, error) {
 	var MembershipPackageModel []model.MembershipPackage
 
 	err := Mpi.db.Find(&MembershipPackageModel).Error
@@ -27,10 +27,10 @@ func (Mpi MembershipPackageImplementation) GetAllMembershipPackage() ([]dto.Memb
 		return nil, err
 	}
 
-	return MembershipPackage , nil
+	return MembershipPackage, nil
 }
 
-func(Mpi *MembershipPackageImplementation) GetMembershipPackageByID(id uint64) (dto.MembershipPackageResponse , error)  {
+func (Mpi *MembershipPackageImplementation) GetMembershipPackageByID(id uint64) (dto.MembershipPackageResponse, error) {
 	var MembershipPackageModel model.MembershipPackage
 
 	err := Mpi.db.Model(&model.MembershipPackage{}).Where("id = ? ", id).Find(&MembershipPackageModel).Error
@@ -43,22 +43,22 @@ func(Mpi *MembershipPackageImplementation) GetMembershipPackageByID(id uint64) (
 	if MembershipPackageModel.ID == 0 {
 		return dto.MembershipPackageResponse{}, gorm.ErrRecordNotFound
 	}
-	
+
 	var MembershipPackage dto.MembershipPackageResponse
 
-	err = copier.Copy(&MembershipPackage,&MembershipPackageModel)
+	err = copier.Copy(&MembershipPackage, &MembershipPackageModel)
 
 	if err != nil {
 		return dto.MembershipPackageResponse{}, err
 	}
 
-	return MembershipPackage, nil 
+	return MembershipPackage, nil
 }
 
-func (Mpi *MembershipPackageImplementation) CreateMembershipPackage(input dto.MembershipPackageCreate) error  {
+func (Mpi *MembershipPackageImplementation) CreateMembershipPackage(input dto.MembershipPackageCreate) error {
 	var MembershipPackageModel model.MembershipPackage
 
-	err := copier.Copy(&MembershipPackageModel,&input)
+	err := copier.Copy(&MembershipPackageModel, &input)
 
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func (Mpi *MembershipPackageImplementation) CreateMembershipPackage(input dto.Me
 func (Mpi *MembershipPackageImplementation) UpdateMembershipPackage(id uint64, input dto.MembershipPackageResponse) error {
 	// Update menu with new data
 	result := Mpi.db.Model(&model.MembershipPackage{}).Where("id = ?", id).Updates(&model.MembershipPackage{
-		AdminID: input.AdminID,
+		AdminID:  input.AdminID,
 		Name:     input.Name,
 		Duration: input.Duration,
 	})
@@ -93,7 +93,6 @@ func (Mpi *MembershipPackageImplementation) UpdateMembershipPackage(id uint64, i
 	return nil
 }
 
-
 func (Mpi *MembershipPackageImplementation) DeleteMembershipPackage(id uint64) error {
 	err := Mpi.db.Where("id = ?", id).Delete(&model.MembershipPackage{}).Error
 
@@ -104,7 +103,32 @@ func (Mpi *MembershipPackageImplementation) DeleteMembershipPackage(id uint64) e
 	return nil
 }
 
-func NewMenuRepository(db *gorm.DB) MembershipPackageRepository  {
+func (Mpi *MembershipPackageImplementation) GetMembershipPackageByAdminID(adminID uint64) ([]dto.MembershipPackageResponse, error) {
+	var MembershipPackageModel []model.MembershipPackage
+
+	err := Mpi.db.Model(&model.MembershipPackage{}).Where("admin_id = ? ", adminID).Find(&MembershipPackageModel).Error
+
+	// Periksa apakah FoodModel kosong (tidak ada data yang ditemukan)
+	if len(MembershipPackageModel) == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var membershippackage []dto.MembershipPackageResponse
+
+	err = copier.Copy(&membershippackage, &MembershipPackageModel)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return membershippackage, nil
+}
+
+func NewMenuRepository(db *gorm.DB) MembershipPackageRepository {
 	return &MembershipPackageImplementation{
 		db: db,
 	}

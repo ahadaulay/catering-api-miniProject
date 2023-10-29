@@ -13,32 +13,32 @@ type MenuController struct {
 	MenuService menuservice.MenuService
 }
 
-func (Mc *MenuController) GetAllMenu(c echo.Context) error  {
+func (Mc *MenuController) GetAllMenu(c echo.Context) error {
 
-	menu,err := Mc.MenuService.GetAllMenu()
+	menu, err := Mc.MenuService.GetAllMenu()
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest,echo.Map{
+		c.JSON(http.StatusBadRequest, echo.Map{
 			"message": "fail get all menu",
 			"error":   err,
 		})
 	}
 
-	return c.JSON(http.StatusAccepted,echo.Map{
-		"message" : "success get all menu",
-		"data" : menu,
+	return c.JSON(http.StatusAccepted, echo.Map{
+		"message": "success get all menu",
+		"data":    menu,
 	})
 }
 
-func (Mc *MenuController) GetMenuByID(c echo.Context) error   {
+func (Mc *MenuController) GetMenuByID(c echo.Context) error {
 	var menu dto.MenuResponse
 
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, echo.Map{
-            "message": "Invalid menu ID",
-        })
-    }
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid menu ID",
+		})
+	}
 
 	menu, err = Mc.MenuService.GetMenuByID(id)
 
@@ -52,7 +52,7 @@ func (Mc *MenuController) GetMenuByID(c echo.Context) error   {
 	// Return response if success
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "success get menu by id",
-		"data" : menu,
+		"data":    menu,
 	})
 
 }
@@ -63,9 +63,9 @@ func (Mc *MenuController) CreateMenu(c echo.Context) error {
 	err := c.Bind(&menu)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest,echo.Map{
-			"message" : "failed to bind data",
-			"error" : err,
+		c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "failed to bind data",
+			"error":   err,
 		})
 	}
 
@@ -88,11 +88,11 @@ func (Mc *MenuController) UpdateMenu(c echo.Context) error {
 	var menu dto.MenuResponse
 
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, echo.Map{
-            "message": "Invalid menu ID",
-        })
-    }
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid menu ID",
+		})
+	}
 
 	// Binding request body to struct
 	if err := c.Bind(&menu); err != nil {
@@ -103,7 +103,7 @@ func (Mc *MenuController) UpdateMenu(c echo.Context) error {
 	}
 
 	// Call service to update menu
-	if err := Mc.MenuService.UpdateMenu(id , menu); err != nil {
+	if err := Mc.MenuService.UpdateMenu(id, menu); err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"message": "Failed to update menu",
 			"error":   err.Error(),
@@ -116,15 +116,14 @@ func (Mc *MenuController) UpdateMenu(c echo.Context) error {
 	})
 }
 
+func (Mc *MenuController) DeleteMenu(c echo.Context) error {
 
-func(Mc *MenuController) DeleteMenu(c echo.Context) error  {
-
-    id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, echo.Map{
-            "message": "Invalid menu ID",
-        })
-    }
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid menu ID",
+		})
+	}
 
 	// Call service to delete course
 	err = Mc.MenuService.DeleteMenu(id)
@@ -142,3 +141,29 @@ func(Mc *MenuController) DeleteMenu(c echo.Context) error  {
 	})
 }
 
+func (Mc *MenuController) GetMenuByAdminID(c echo.Context) error {
+	var menu []dto.MenuResponse
+
+	admin_id, err := strconv.ParseUint(c.Param("admin_id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid menu ID",
+		})
+	}
+
+	menu, err = Mc.MenuService.GetMenuByAdminID(admin_id)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "fail get menu",
+			"error":   err.Error(),
+		})
+	}
+
+	// Return response if success
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "success get menu by admin id",
+		"data":    menu,
+	})
+
+}

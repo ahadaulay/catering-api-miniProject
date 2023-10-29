@@ -12,7 +12,7 @@ type MenuImplementation struct {
 	db *gorm.DB
 }
 
-func (Mi *MenuImplementation) GetAllMenu() ([]dto.MenuResponse,error)  {
+func (Mi *MenuImplementation) GetAllMenu() ([]dto.MenuResponse, error) {
 	var MenuModel []model.Menu
 
 	err := Mi.db.Find(&MenuModel).Error
@@ -27,10 +27,10 @@ func (Mi *MenuImplementation) GetAllMenu() ([]dto.MenuResponse,error)  {
 		return nil, err
 	}
 
-	return Menu , nil
+	return Menu, nil
 }
 
-func(Mi *MenuImplementation) GetMenuByID(id uint64) (dto.MenuResponse , error)  {
+func (Mi *MenuImplementation) GetMenuByID(id uint64) (dto.MenuResponse, error) {
 	var MenuModel model.Menu
 
 	err := Mi.db.Model(&model.Menu{}).Where("id = ? ", id).Find(&MenuModel).Error
@@ -43,22 +43,22 @@ func(Mi *MenuImplementation) GetMenuByID(id uint64) (dto.MenuResponse , error)  
 	if MenuModel.ID == 0 {
 		return dto.MenuResponse{}, gorm.ErrRecordNotFound
 	}
-	
+
 	var Menu dto.MenuResponse
 
-	err = copier.Copy(&Menu,&MenuModel)
+	err = copier.Copy(&Menu, &MenuModel)
 
 	if err != nil {
 		return dto.MenuResponse{}, err
 	}
 
-	return Menu, nil 
+	return Menu, nil
 }
 
-func (Mi *MenuImplementation) CreateMenu(input dto.MenuCreate) error  {
+func (Mi *MenuImplementation) CreateMenu(input dto.MenuCreate) error {
 	var MenuModel model.Menu
 
-	err := copier.Copy(&MenuModel,&input)
+	err := copier.Copy(&MenuModel, &input)
 
 	if err != nil {
 		return err
@@ -94,7 +94,6 @@ func (Mi *MenuImplementation) UpdateMenu(id uint64, input dto.MenuResponse) erro
 	return nil
 }
 
-
 func (Mi *MenuImplementation) DeleteMenu(id uint64) error {
 	err := Mi.db.Where("id = ?", id).Delete(&model.Menu{}).Error
 
@@ -105,7 +104,32 @@ func (Mi *MenuImplementation) DeleteMenu(id uint64) error {
 	return nil
 }
 
-func NewMenuRepository(db *gorm.DB) MenuRepository  {
+func (Mi *MenuImplementation) GetMenuByAdminID(adminID uint64) ([]dto.MenuResponse, error) {
+	var MenuModel []model.Menu
+
+	err := Mi.db.Model(&model.Menu{}).Where("admin_id = ? ", adminID).Find(&MenuModel).Error
+
+	// Periksa apakah FoodModel kosong (tidak ada data yang ditemukan)
+	if len(MenuModel) == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var Menu []dto.MenuResponse
+
+	err = copier.Copy(&Menu, &MenuModel)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return Menu, nil
+}
+
+func NewMenuRepository(db *gorm.DB) MenuRepository {
 	return &MenuImplementation{
 		db: db,
 	}

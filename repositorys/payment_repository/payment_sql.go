@@ -76,8 +76,8 @@ func (Pi *PaymentImplementation) CreatePayment(input dto.PaymentCreate) error {
 func (Pi *PaymentImplementation) UpdatePayment(id uint64, input dto.PaymentResponse) error {
 	// Update menu with new data
 	result := Pi.db.Model(&model.Payment{}).Where("id = ?", id).Updates(&model.Payment{
-		AdminID: input.AdminID,
-		AccountName: input.AccountName,
+		AdminID:       input.AdminID,
+		AccountName:   input.AccountName,
 		AccountNumber: input.AccountName,
 	})
 
@@ -101,6 +101,31 @@ func (Pi *PaymentImplementation) DeletePayment(id uint64) error {
 	}
 
 	return nil
+}
+
+func (Pi *PaymentImplementation) GetPaymentByAdminID(adminID uint64) ([]dto.PaymentResponse, error) {
+	var PaymentModel []model.Payment
+
+	err := Pi.db.Model(&model.Payment{}).Where("admin_id = ? ", adminID).Find(&PaymentModel).Error
+
+	// Periksa apakah FoodModel kosong (tidak ada data yang ditemukan)
+	if len(PaymentModel) == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var payment []dto.PaymentResponse
+
+	err = copier.Copy(&payment, &PaymentModel)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return payment, nil
 }
 
 func NewPaymentRepository(db *gorm.DB) PaymentRepository {

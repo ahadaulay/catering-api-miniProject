@@ -13,32 +13,32 @@ type PaymentController struct {
 	PaymentService paymentservice.PaymentService
 }
 
-func (Ps *PaymentController) GetAllPayment(c echo.Context) error  {
+func (Ps *PaymentController) GetAllPayment(c echo.Context) error {
 
-	payment,err := Ps.PaymentService.GetAllPayment()
+	payment, err := Ps.PaymentService.GetAllPayment()
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest,echo.Map{
+		c.JSON(http.StatusBadRequest, echo.Map{
 			"message": "fail get all payment",
 			"error":   err,
 		})
 	}
 
-	return c.JSON(http.StatusAccepted,echo.Map{
-		"message" : "success get all paymnet",
-		"data" : payment,
+	return c.JSON(http.StatusAccepted, echo.Map{
+		"message": "success get all paymnet",
+		"data":    payment,
 	})
 }
 
-func (Pc *PaymentController) GetPaymentByID(c echo.Context) error   {
+func (Pc *PaymentController) GetPaymentByID(c echo.Context) error {
 	var payment dto.PaymentResponse
 
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, echo.Map{
-            "message": "Invalid payment ID",
-        })
-    }
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid payment ID",
+		})
+	}
 
 	payment, err = Pc.PaymentService.GetPaymentByID(id)
 
@@ -52,7 +52,7 @@ func (Pc *PaymentController) GetPaymentByID(c echo.Context) error   {
 	// Return response if success
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "success get payment by id",
-		"data" : payment,
+		"data":    payment,
 	})
 
 }
@@ -63,9 +63,9 @@ func (Pc *PaymentController) CreatePayment(c echo.Context) error {
 	err := c.Bind(&payment)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest,echo.Map{
-			"message" : "failed to bind data",
-			"error" : err,
+		c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "failed to bind data",
+			"error":   err,
 		})
 	}
 
@@ -88,11 +88,11 @@ func (Pc *PaymentController) UpdatePayment(c echo.Context) error {
 	var payment dto.PaymentResponse
 
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, echo.Map{
-            "message": "Invalid payment ID",
-        })
-    }
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid payment ID",
+		})
+	}
 
 	// Binding request body to struct
 	if err := c.Bind(&payment); err != nil {
@@ -103,7 +103,7 @@ func (Pc *PaymentController) UpdatePayment(c echo.Context) error {
 	}
 
 	// Call service to update menu
-	if err := Pc.PaymentService.UpdatePayment(id , payment); err != nil {
+	if err := Pc.PaymentService.UpdatePayment(id, payment); err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"message": "Failed to update payment",
 			"error":   err.Error(),
@@ -116,15 +116,14 @@ func (Pc *PaymentController) UpdatePayment(c echo.Context) error {
 	})
 }
 
+func (Pc *PaymentController) DeletePayment(c echo.Context) error {
 
-func(Pc *PaymentController) DeletePayment(c echo.Context) error  {
-
-    id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, echo.Map{
-            "message": "Invalid payment ID",
-        })
-    }
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid payment ID",
+		})
+	}
 
 	// Call service to delete course
 	err = Pc.PaymentService.DeletePayment(id)
@@ -142,3 +141,29 @@ func(Pc *PaymentController) DeletePayment(c echo.Context) error  {
 	})
 }
 
+func (Pc *PaymentController) GetPaymentByAdminID(c echo.Context) error {
+	var payment []dto.PaymentResponse
+
+	admin_id, err := strconv.ParseUint(c.Param("admin_id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid payment ID",
+		})
+	}
+
+	payment, err = Pc.PaymentService.GetPaymentByAdminID(admin_id)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "fail get payment",
+			"error":   err.Error(),
+		})
+	}
+
+	// Return response if success
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "success get payment by admin id",
+		"data":    payment,
+	})
+
+}
